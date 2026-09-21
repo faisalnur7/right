@@ -1,11 +1,26 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+    @php
+        $authPageTitle = match (true) {
+            request()->routeIs('admin.login') => 'Admin Login',
+            request()->routeIs('admin.register') => 'Create Admin Account',
+            request()->routeIs('merchant.login') => 'Merchant Login',
+            request()->routeIs('merchant.register') => 'Create Merchant Account',
+            request()->routeIs('login') => 'Sign In',
+            request()->routeIs('register') => 'Create Account',
+            request()->routeIs('password.request') => 'Forgot Password',
+            request()->routeIs('password.reset') => 'Reset Password',
+            request()->routeIs('login_otp') => 'Verify Sign In',
+            request()->routeIs('otp', 'user.otpPage') => 'Verify Account',
+            default => 'Secure Access',
+        };
+    @endphp
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Right BD') }}</title>
+        <title>{{ $authPageTitle }} | Right</title>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -16,7 +31,7 @@
         <link href="{{asset('assets/css/guest_style.css')}}" rel="stylesheet" />
 
     </head>
-    <body class="font-sans text-gray-900 antialiased bg-animation">
+    <body class="font-sans text-gray-900 antialiased auth-body">
         @include('layouts.partials._customer_guest_nav')
         {{-- <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0">
             <div class="flex items-center justify-center">
