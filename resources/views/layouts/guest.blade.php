@@ -25,6 +25,7 @@
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+        <link rel="stylesheet" href="{{ asset('assets/plugins/fontawesome-free/css/all.min.css') }}">
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         {{-- <script src="https://cdn.tailwindcss.com"></script> --}}
@@ -41,5 +42,19 @@
                 {{ $slot }}
             {{-- </div>
         </div> --}}
+        <script>
+            document.addEventListener('click', function (event) {
+                const toggle = event.target.closest('[data-password-toggle]');
+                if (!toggle) return;
+
+                const input = document.getElementById(toggle.dataset.passwordToggle);
+                if (!input) return;
+
+                const isVisible = input.type === 'text';
+                input.type = isVisible ? 'password' : 'text';
+                toggle.setAttribute('aria-label', isVisible ? 'Show password' : 'Hide password');
+                toggle.innerHTML = `<i class="far ${isVisible ? 'fa-eye' : 'fa-eye-slash'}" aria-hidden="true"></i>`;
+            });
+        </script>
     </body>
 </html>

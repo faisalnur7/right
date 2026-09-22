@@ -28,6 +28,7 @@
                                 <th>Account Number</th>
                                 <th>Order</th>
                                 <th>Logo</th>
+                                <th>Zoomable</th>
                                 <th style="width: 150px;">Actions</th>
                             </tr>
                         </thead>
@@ -44,6 +45,11 @@
                                         @else
                                             <span class="text-muted">No logo</span>
                                         @endif
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-{{ $option->zoomable ? 'success' : 'secondary' }}">
+                                            {{ $option->zoomable ? 'Yes' : 'No' }}
+                                        </span>
                                     </td>
                                     <td>
                                         <a href="{{ route('payment_option.edit', $option->id) }}" 

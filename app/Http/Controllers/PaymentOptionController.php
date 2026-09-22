@@ -23,10 +23,12 @@ class PaymentOptionController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'order' => 'required|integer',
+            'zoomable' => 'required|boolean',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048'
         ]);
 
-        $data = $request->only(['name', 'order','account_number']);
+        $data = $request->only(['name', 'order', 'account_number']);
+        $data['zoomable'] = (int) $request->boolean('zoomable');
 
         // Image Upload (as per your instruction)
         if ($request->hasFile('logo')) {
@@ -54,10 +56,12 @@ class PaymentOptionController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'order' => 'required|integer',
+            'zoomable' => 'required|boolean',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048'
         ]);
     
-        $data = $request->only(['name', 'order','account_number']);
+        $data = $request->only(['name', 'order', 'account_number']);
+        $data['zoomable'] = (int) $request->boolean('zoomable');
     
         if ($request->hasFile('logo')) {
             // Delete old logo if exists

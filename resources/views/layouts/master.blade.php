@@ -10,7 +10,9 @@
         <!-- Content Wrapper. Contains page content -->
         <div class="content-wrapper">
             <!-- Content Header (Page header) -->
-            @include('layouts.partials._header')
+            @if (!View::hasSection('hide_page_header'))
+                @include('layouts.partials._header')
+            @endif
             <!-- Main content -->
             <section class="content">
                 <div class="container-fluid">

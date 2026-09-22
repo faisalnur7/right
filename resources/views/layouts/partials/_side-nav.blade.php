@@ -22,7 +22,7 @@
               </div>
               <div class="flex flex-col gap-1">
                   <a href="#" class="font-extrabold">{{ auth()->user()->name }}</a>
-                  <a href="#" class="font-bold">ID:
+                  <a href="#" class="font-bold">SL No.:
                       {{ auth()->user()->kyc ? auth()->user()->kyc->affiliate_id : '' }}</a>
               </div>
           </div>
