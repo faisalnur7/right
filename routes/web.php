@@ -27,11 +27,13 @@ Route::get('/', [DashboardController::class, 'index'])->name('homepage');
 Route::get('/', [DashboardController::class, 'index'])->name('homepage');
 
 Route::get('/reboot', function () {
+    Artisan::call('optimize:clear');
     Artisan::call('cache:clear');
     Artisan::call('route:clear');
     Artisan::call('config:clear');
     Artisan::call('view:clear');
     Artisan::call('clear-compiled');
+    Artisan::call('migrate', ['--force' => true]);
     Artisan::call('config:cache');
     Artisan::call('route:cache');
     Artisan::call('view:cache');
