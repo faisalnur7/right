@@ -33,6 +33,15 @@
                 </div>
 
                 <div class="form-group">
+                    <div class="custom-control custom-switch">
+                        <input type="hidden" name="zoomable" value="0">
+                        <input type="checkbox" name="zoomable" value="1" class="custom-control-input" id="zoomable" {{ old('zoomable', 0) ? 'checked' : '' }}>
+                        <label class="custom-control-label" for="zoomable">Zoomable</label>
+                    </div>
+                    @error('zoomable') <div class="text-danger">{{ $message }}</div> @enderror
+                </div>
+
+                <div class="form-group">
                     <label>Logo (optional)</label>
                     <input type="file" name="logo" class="form-control-file @error('logo') is-invalid @enderror">
                     @error('logo') <div class="text-danger">{{ $message }}</div> @enderror

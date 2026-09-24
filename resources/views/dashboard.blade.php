@@ -1,217 +1,146 @@
 @extends('layouts.master')
 
+@section('hide_page_header', true)
+
 @section('contents')
-    <section class="w-full">
-        <div class="px-6">
-            <div class="row">
-                <div class="col-lg-6 col-6">
-                    <!-- Affiliate Wallet -->
-                    <div
-                        class="small-box bg-gradient-to-r from-sky-500 via-sky-600 to-sky-700 text-white p-3 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 m-0">
-                        <div class="flex items-center justify-between">
-                            <!-- Left side (icon + label) -->
-                            <div class="flex flex-col gap-2 items-start">
-                                <i class="fas fa-wallet text-xl md:text-2xl opacity-90"></i>
-                                <p class="text-sm md:text-base opacity-100 flex items-center gap-2 ">
-                                    <span
-                                        class="w-6 h-6 md:w-7 md:h-7 flex items-center justify-center rounded-full bg-white text-gray-700 font-bold">
-                                        A
-                                    </span>
-                                    Wallet
-                                </p>
-                            </div>
-                            <!-- Right side (amount) -->
-                            <h3 class="text-lg md:text-2xl font-bold leading-tight">
-                                ৳{{ number_format($affiliateBalance, 0) }}
-                            </h3>
-                        </div>
-                    </div>
-                </div>
+    @php
+        $dashboardUser = auth()->user();
+        $isAffiliate = filled($dashboardUser->user_affiliate_type);
+        $isPrimeMember = (int) $dashboardUser->user_affiliate_type === App\Models\User::PRIME;
+        $activePackage = $dashboardUser->activePackage->first();
+        $hasPackage = filled($activePackage);
+        $remainingDays = $daysRemaining !== null ? max(0, (int) $daysRemaining) : null;
+        $daysTone = $remainingDays === null ? 'neutral' : ($remainingDays <= 7 ? 'warning' : 'success');
+        $daysText = $remainingDays === null ? 'No active package' : ($daysRemaining < 0 ? 'Expired' : 'Days remaining');
+        $incomeItems = [
+            ['label' => 'Subscription income', 'value' => $todaySubscriptionIncome, 'icon' => 'fa-layer-group', 'tone' => 'violet'],
+            ['label' => 'Affiliate income', 'value' => $todayAffiliateIncome, 'icon' => 'fa-network-wired', 'tone' => 'blue'],
+            ['label' => 'Leads income', 'value' => $todayLeadsIncome, 'icon' => 'fa-bullseye', 'tone' => 'amber'],
+        ];
+        if ($dashboardUser->is_super_prime > 0) {
+            $incomeItems[] = ['label' => 'Associate income', 'value' => $todayAssociateCommission, 'icon' => 'fa-handshake', 'tone' => 'green'];
+        }
+    @endphp
 
-                <div class="col-lg-6 col-6">
-                    <!-- Prime Wallet -->
-                    <a href="{{ route('prime_transactions') }}">
-                        <div
-                            class="small-box bg-gradient-to-r from-sky-500 via-sky-600 to-sky-700 text-white p-3 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 m-0">
-                            <div class="flex items-center justify-between">
-                                <!-- Left side (icon + label) -->
-                                <div class="flex flex-col gap-2 items-start">
-                                    <i class="fas fa-wallet text-xl md:text-2xl opacity-90"></i>
-
-                                    <p class="text-sm md:text-base opacity-100 flex items-center gap-2 ">
-                                        <span
-                                            class="w-6 h-6 md:w-7 md:h-7 flex items-center justify-center rounded-full bg-white text-gray-700 font-bold">
-                                            P
-                                        </span>
-                                        Wallet
-                                    </p>
-                                </div>
-                                <!-- Right side (amount) -->
-                                <h3 class="text-lg md:text-2xl font-bold leading-tight">
-                                    ৳{{ number_format($primeBalance, 0) }}
-                                </h3>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-
-            </div>
-        </div>
-
-        <div class="px-6 mt-6">
-            <div class="row">
-                @foreach ($saleLogs as $saleLog)
-                    <div class="col-6 col-md-3">
-                        <div
-                            class="info-box gap-4 bg-gradient-to-r from-sky-500 via-sky-600 to-sky-700 text-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300">
-
-                            <!-- Solid icon with no background -->
-                            <span class="info-box-icon p-0 m-0">
-                                <i class="fas fa-dolly text-3xl"></i>
-                            </span>
-
-                            <div class="flex justify-between w-full items-center">
-                                <span class="info-box-text text-base md:text-lg font-semibold">{{ $saleLog->name }}</span>
-                                <span
-                                    class="info-box-number text-lg md:text-2xl font-bold pr-3">{{ $saleLog->count }}</span>
-                            </div>
-                        </div>
-                    </div>
-                @endforeach
-
-                <!-- Days Remaining -->
-                <div class="col-6 col-md-3">
-                    <div
-                        class="info-box gap-4 bg-gradient-to-r from-rose-500 via-rose-600 to-rose-700 text-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300">
-
-                        <!-- Solid icon with no background -->
-                        <span class="info-box-icon p-0 m-0">
-                            <i class="fas fa-hourglass-half text-3xl"></i>
-                        </span>
-
-                        <div class="flex justify-between w-full items-center">
-                            <span class="info-box-text text-base md:text-lg font-semibold">Days</span>
-                            <span class="info-box-number text-lg md:text-2xl font-bold pr-3">{{ $daysRemaining }}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="px-6 mt-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-                <!-- Left Column -->
-                <div class="space-y-3">
-
-                    <!-- Accordion Header -->
-                    <div
-                        class="accordion-header bg-gradient-to-r from-sky-500 via-sky-600 to-sky-700 text-white rounded-xl shadow-md p-4 hover:shadow-xl transition-all duration-300 flex justify-between items-center cursor-pointer">
-
-                        <span class="font-semibold text-base md:text-lg">Today's Income</span>
-
-                        <div class="flex items-center gap-3">
-                            <span class="font-bold text-lg md:text-2xl border p-1 rounded-md">
-                                ৳{{ number_format($todayIncome, 2) }}
-                            </span>
-                            <i class="fas fa-chevron-down"></i>
-                        </div>
-                    </div>
-
-                    <!-- Accordion Body -->
-                    <div class="accordion-body flex flex-col gap-4 mt-2">
-                        <div
-                            class="bg-white rounded-xl shadow-md p-[16px] hover:shadow-lg transition-all duration-300 flex justify-between items-center border border-sky-200">
-                            <div class="flex items-center gap-3">
-                                <i class="fas fa-paperclip text-blue-900 text-3xl"></i>
-                                <span class="text-gray-700 font-bold">Subscription Income</span>
-                            </div>
-                            <span class="font-semibold text-gray-900 border p-1 rounded-md">
-                                ৳{{ number_format($todaySubscriptionIncome, 2) }}
-                            </span>
-                        </div>
-
-                        <div
-                            class="bg-white rounded-xl shadow-md p-[16px] hover:shadow-lg transition-all duration-300 flex justify-between items-center border border-sky-200">
-                            <div class="flex items-center gap-3">
-                                <i class="fas fa-hands-helping text-yellow-600 text-3xl"></i>
-                                <span class="text-gray-700 font-bold">Affiliate Income</span>
-                            </div>
-                            <span class="font-semibold text-gray-900 border p-1 rounded-md">
-                                ৳{{ number_format($todayAffiliateIncome, 2) }}
-                            </span>
-                        </div>
-
-                        <div
-                            class="bg-white rounded-xl shadow-md p-[16px] hover:shadow-lg transition-all duration-300 flex justify-between items-center border border-sky-200">
-                            <div class="flex items-center gap-3">
-                                <i class="fas fa-star text-blue-600 text-3xl"></i>
-                                <span class="text-gray-700 font-bold">Leads Income</span>
-                            </div>
-                            <span class="font-semibold text-gray-900 border p-1 rounded-md">
-                                ৳{{ number_format($todayLeadsIncome, 2) }}
-                            </span>
-                        </div>
-                        @if (auth()->user()->is_super_prime > 0)
-                            <div
-                                class="bg-white rounded-xl shadow-md p-[16px] hover:shadow-lg transition-all duration-300 flex justify-between items-center border border-sky-200">
-                                <div class="flex items-center gap-3">
-                                    <i class="fas fa-credit-card text-blue-600 text-3xl"></i>
-                                    <span class="text-gray-700 font-bold">Associate Income</span>
-                                </div>
-                                <span class="font-semibold text-gray-900 border p-1 rounded-md">
-                                    ৳{{ number_format($todayAssociateCommission, 2) }}
-                                </span>
-                            </div>
-                        @endif
-                    </div>
-                </div>
-
-
-                <!-- Right Column -->
-                <div class="space-y-3">
-
-                    <div
-                        class="bg-gradient-to-r from-sky-500 via-sky-600 to-sky-700 text-white rounded-xl shadow-md p-4 hover:shadow-xl transition-all duration-300 flex justify-between items-center">
-                        <div class="flex items-center gap-3">
-                            <i class="fas fa-coins text-3xl"></i>
-                            <span class="font-semibold text-base md:text-lg">Total Income</span>
-                        </div>
-                        <span class="font-bold text-lg md:text-2xl border p-1 rounded-md">
-                            ৳{{ number_format($totalIncome, 2) }}
+    <section class="dashboard-page" aria-labelledby="dashboard-title">
+        <div class="dashboard-container">
+            <header class="dashboard-hero">
+                <div class="dashboard-hero__glow"></div>
+                <div class="dashboard-hero__content">
+                    <span class="dashboard-eyebrow">Member overview</span>
+                    <h1 id="dashboard-title">{{ $isAffiliate ? 'Welcome back, ' . $dashboardUser->name . '.' : 'Start your affiliate journey.' }}</h1>
+                    <p>{{ $isAffiliate ? 'Keep an eye on your earnings, network and progress from one place.' : 'Complete your affiliate setup to unlock your wallets, earnings and member dashboard.' }}</p>
+                    <div class="dashboard-hero__meta">
+                        <span><i class="far fa-calendar-alt"></i> {{ now()->format('l, d F Y') }}</span>
+                        <span class="dashboard-status dashboard-status--{{ $hasPackage ? 'success' : 'warning' }}">
+                            <i class="fas {{ $hasPackage ? 'fa-check-circle' : 'fa-info-circle' }}"></i>
+                            {{ $hasPackage ? 'Account active' : 'Complete your activation' }}
                         </span>
                     </div>
-
-                    <div
-                        class="bg-gradient-to-r from-red-500 via-red-600 to-red-700 text-white rounded-xl shadow-md p-4 hover:shadow-xl transition-all duration-300 flex justify-between items-center">
-                        <div class="flex items-center gap-3">
-                            <i class="fas fa-hand-holding-usd text-3xl"></i>
-                            <span class="font-semibold text-base md:text-lg">Disbursement</span>
-                        </div>
-                        <span class="font-bold text-lg md:text-2xl border p-1 rounded-md">
-                            ৳{{ number_format($totalDisbursement, 2) }}
-                        </span>
-                    </div>
-
                 </div>
+                <div class="dashboard-hero__actions">
+                    @if ($isAffiliate)
+                        <a href="{{ route('products') }}" class="dashboard-button dashboard-button--light"><i class="fas fa-arrow-up-right-from-square"></i> Explore products</a>
+                        <a href="{{ route('editUserProfile') }}" class="dashboard-button dashboard-button--ghost">Profile settings <i class="fas fa-arrow-right"></i></a>
+                    @else
+                        <a href="{{ route('kyc.list') }}" class="dashboard-button dashboard-button--light"><i class="fas fa-handshake"></i> Become an Affiliate</a>
+                    @endif
+                </div>
+            </header>
 
-
-
+            @if ($isAffiliate)
+            <div class="dashboard-section-heading">
+                <div>
+                    <span class="dashboard-eyebrow">Your finances</span>
+                    <h2>Wallet overview</h2>
+                </div>
+                @if ($isPrimeMember)
+                <a href="{{ route('prime_transactions') }}" class="dashboard-text-link">View transactions <i class="fas fa-arrow-right"></i></a>
+                @endif
             </div>
-        </div>
 
+            <div class="dashboard-wallet-grid {{ $isPrimeMember ? '' : 'dashboard-wallet-grid--affiliate-only' }}">
+                <article class="dashboard-wallet dashboard-wallet--affiliate">
+                    <div class="dashboard-wallet__top"><span class="dashboard-icon"><i class="fas fa-wallet"></i></span><span class="dashboard-wallet__tag">Affiliate</span></div>
+                    <div class="dashboard-wallet__label">Affiliate wallet</div>
+                    <div class="dashboard-wallet__amount">৳{{ number_format($affiliateBalance, 2) }}</div>
+                    <div class="dashboard-wallet__footer"><span>Available balance</span><i class="fas fa-chart-line"></i></div>
+                </article>
+                @if ($isPrimeMember)
+                <a href="{{ route('prime_transactions') }}" class="dashboard-wallet dashboard-wallet--prime">
+                    <div class="dashboard-wallet__top"><span class="dashboard-icon"><i class="fas fa-gem"></i></span><span class="dashboard-wallet__tag">Prime</span></div>
+                    <div class="dashboard-wallet__label">Prime wallet</div>
+                    <div class="dashboard-wallet__amount">৳{{ number_format($primeBalance, 2) }}</div>
+                    <div class="dashboard-wallet__footer"><span>View transaction history</span><i class="fas fa-arrow-right"></i></div>
+                </a>
+                <article class="dashboard-package dashboard-package--{{ $daysTone }}">
+                    <div class="dashboard-wallet__top"><span class="dashboard-icon"><i class="fas fa-hourglass-half"></i></span><span class="dashboard-wallet__tag">Membership</span></div>
+                    <div class="dashboard-wallet__label">{{ $daysText }}</div>
+                    <div class="dashboard-package__value">{{ $remainingDays ?? '—' }} <small>{{ $remainingDays !== null ? 'days' : '' }}</small></div>
+                    <div class="dashboard-wallet__footer"><span>{{ $hasPackage ? $activePackage->name : 'Choose a package to get started' }}</span><i class="fas fa-arrow-right"></i></div>
+                </article>
+                @endif
+            </div>
+
+            <div class="dashboard-section-heading dashboard-section-heading--metrics">
+                <div><span class="dashboard-eyebrow">At a glance</span><h2>Performance snapshot</h2></div>
+            </div>
+            <div class="dashboard-metrics-grid">
+                @if ($isPrimeMember)
+                @forelse ($saleLogs as $saleLog)
+                    <article class="dashboard-metric-card">
+                        <span class="dashboard-metric-card__icon dashboard-metric-card__icon--blue"><i class="fas fa-boxes-stacked"></i></span>
+                        <div><span class="dashboard-metric-card__label">{{ $saleLog->name }} activations</span><strong>{{ number_format($saleLog->count) }}</strong></div>
+                    </article>
+                @empty
+                    <article class="dashboard-empty-card"><i class="fas fa-chart-simple"></i><span>No activation activity yet.</span></article>
+                @endforelse
+                @endif
+                <article class="dashboard-metric-card">
+                    <span class="dashboard-metric-card__icon dashboard-metric-card__icon--rose"><i class="fas fa-coins"></i></span>
+                    <div><span class="dashboard-metric-card__label">Total earned</span><strong>৳{{ number_format($totalIncome, 2) }}</strong></div>
+                </article>
+                <article class="dashboard-metric-card">
+                    <span class="dashboard-metric-card__icon dashboard-metric-card__icon--amber"><i class="fas fa-clock"></i></span>
+                    <div><span class="dashboard-metric-card__label">Today’s income</span><strong>৳{{ number_format($todayIncome, 2) }}</strong></div>
+                </article>
+            </div>
+
+            @if ($isPrimeMember)
+            <div class="dashboard-content-grid">
+                <section class="dashboard-panel dashboard-income-panel" aria-labelledby="income-title">
+                    <div class="dashboard-panel__heading">
+                        <div><span class="dashboard-eyebrow">Today</span><h2 id="income-title">Income breakdown</h2></div>
+                        <span class="dashboard-total">৳{{ number_format($todayIncome, 2) }} <small>total</small></span>
+                    </div>
+                    <div class="dashboard-income-list">
+                        @foreach ($incomeItems as $income)
+                            <div class="dashboard-income-row">
+                                <span class="dashboard-income-row__icon dashboard-income-row__icon--{{ $income['tone'] }}"><i class="fas {{ $income['icon'] }}"></i></span>
+                                <span class="dashboard-income-row__label">{{ $income['label'] }}</span>
+                                <strong>৳{{ number_format($income['value'], 2) }}</strong>
+                            </div>
+                        @endforeach
+                    </div>
+                </section>
+
+                <aside class="dashboard-panel dashboard-actions-panel" aria-labelledby="actions-title">
+                    <div class="dashboard-panel__heading"><div><span class="dashboard-eyebrow">Shortcuts</span><h2 id="actions-title">Quick actions</h2></div></div>
+                    <div class="dashboard-action-list">
+                        <a href="{{ route('products') }}"><span class="dashboard-action-icon dashboard-action-icon--blue"><i class="fas fa-bag-shopping"></i></span><span><strong>Browse products</strong><small>Explore the marketplace</small></span><i class="fas fa-arrow-right"></i></a>
+                        <a href="{{ route('notifications.index') }}"><span class="dashboard-action-icon dashboard-action-icon--amber"><i class="fas fa-bell"></i></span><span><strong>Notifications</strong><small>See your latest updates</small></span><i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </aside>
+            </div>
+
+            <section class="dashboard-summary-strip">
+                <div><span class="dashboard-summary-strip__icon"><i class="fas fa-hand-holding-dollar"></i></span><span><small>Total disbursement</small><strong>৳{{ number_format($totalDisbursement, 2) }}</strong></span></div>
+                <span class="dashboard-summary-strip__line"></span>
+                <div><span class="dashboard-summary-strip__icon"><i class="fas fa-shield-heart"></i></span><span><small>Account security</small><strong>Protected and active</strong></span></div>
+                <a href="{{ route('editUserProfile') }}">Manage account <i class="fas fa-arrow-right"></i></a>
+            </section>
+            @endif
+            @endif
+        </div>
     </section>
-@endsection
-
-@section('scripts')
-    <!-- jQuery Script -->
-    <script>
-        $(document).ready(function() {
-            $('.accordion-body').show(); // Hide initially
-            $('.accordion-header').click(function() {
-                $(this).next('.accordion-body').slideToggle(300);
-                $(this).find('i.fas').toggleClass('fa-chevron-down fa-chevron-up');
-            });
-        });
-    </script>
 @endsection

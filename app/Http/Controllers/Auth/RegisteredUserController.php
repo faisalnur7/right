@@ -44,11 +44,10 @@ class RegisteredUserController extends Controller
     {
         // Validate inputs
         $request->validate([
-            'phone' => 'required|unique:users,phone',
+            'phone' => ['required', 'numeric', 'digits:11', 'unique:users,phone', 'unique:otps,phone'],
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'email' => ['nullable', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'phone' => 'required|numeric|digits:11|unique:otps,phone',
         ]);
         
         $user = User::query()->where('phone',$request->phone)->first();

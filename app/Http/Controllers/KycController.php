@@ -174,7 +174,7 @@ class KycController extends Controller
         $notificationService = new NotificationService();    
         $notificationService->create('affiliate_request', $user->reference_user_id, $notificationData, 0);
 
-        return redirect()->route('kyc.list')->with('success', 'KYC record created successfully.');
+        return redirect()->route('kyc.list')->with('success', 'Thank you for submitting the form for the affiliate program.');
     }
 
     public function prime(){
@@ -388,13 +388,26 @@ class KycController extends Controller
     }
 
     public function finish_payment(Request $request){
-        
+        $request->validate([
+            'subscription_package_id' => 'required|exists:subscription_packages,id',
+            'payment_option_id' => 'required|exists:payment_options,id',
+            'transaction_number' => 'required|string|max:100',
+            'transaction_mobile_number' => 'required|string|max:100',
+        ]);
+
         $user = auth()->user();
+        $updatePackage = PackageUser::where('user_id', $user->id)->where('status', User::USER_PACKAGE_PENDING)->first();
+        if (!$updatePackage) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Please select a package before submitting payment.',
+            ], 422);
+        }
+
+        $package = SubscriptionPackage::query()->findOrFail($request->subscription_package_id);
+
         $user->prime_verified = User::PRIME_VERIFIED_STATUS_PAYMENT;
         $user->save();
-
-        $updatePackage = PackageUser::where('user_id', $user->id)->where('status', User::USER_PACKAGE_PENDING)->first();
-        $package = SubscriptionPackage::query()->findOrFail($request->subscription_package_id);
 
         $data = $request->all();
         $data['user_id'] = $user->id;

@@ -22,7 +22,7 @@
 
                 <div class="form-group">
                     <label>Account Number</label>
-                    <input type="text" name="account_number" class="form-control @error('account_number') is-invalid @enderror" required value="{{ old('account_number') }}">
+                    <input type="text" name="account_number" class="form-control @error('account_number') is-invalid @enderror" required value="{{ old('account_number', $paymentOption->account_number) }}">
                     @error('account_number') <div class="invalid-feedback">{{ $message }}</div> @enderror
                 </div>
 
@@ -30,6 +30,15 @@
                     <label>Order</label>
                     <input type="number" name="order" class="form-control @error('order') is-invalid @enderror" value="{{ old('order', $paymentOption->order) }}" required>
                     @error('order') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                </div>
+
+                <div class="form-group">
+                    <div class="custom-control custom-switch">
+                        <input type="hidden" name="zoomable" value="0">
+                        <input type="checkbox" name="zoomable" value="1" class="custom-control-input" id="zoomable" {{ old('zoomable', $paymentOption->zoomable) ? 'checked' : '' }}>
+                        <label class="custom-control-label" for="zoomable">Zoomable</label>
+                    </div>
+                    @error('zoomable') <div class="text-danger">{{ $message }}</div> @enderror
                 </div>
 
                 <div class="form-group">

@@ -1,7 +1,7 @@
 <!-- Navbar -->
-<nav class="main-header navbar navbar-expand navbar-white navbar-light" style="position: sticky; top: 0;">
+<nav class="main-header navbar navbar-expand navbar-white navbar-light right-top-nav" style="position: sticky; top: 0;">
     <!-- Left navbar links -->
-    <ul class="navbar-nav">
+    <ul class="navbar-nav right-top-nav__left">
         <li class="nav-item">
             <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
         </li>
@@ -28,9 +28,8 @@
                 $daysRemaining = $today->diffInDays($expiresAt, false);
             }
 
-            $badgeDesign =
-                'btn bg-[#252f51] bg-transparent text-gray-800 px-2 md:px-4 rounded-md ml-4 btn-shine border-shine  font-semibold text-xs md:text-sm lg:text-base flex gap-1 md:gap-2 justify-center items-center hover:opacity-90 focus:ring-2';
-            $badgeTextDesign = 'badge text-[#252f51] bg-white border text-md md:text-sm lg:text-base rounded-lg';
+            $badgeDesign = 'right-top-nav__metric';
+            $badgeTextDesign = 'right-top-nav__metric-value';
             $notifications = App\Models\Notification::with('user')
                 ->where(function ($q) {
                     $q->where('user_id', auth()->id())->orWhereNull('user_id');
@@ -48,7 +47,7 @@
                 ->count();
 
         @endphp
-        <div class="flex gap-0 md:ml-4">
+        <div class="flex gap-0 md:ml-4 right-top-nav__sales">
             @if (!empty(auth()->user()) && auth()->user()->is_active && !empty(auth()->user()->saleLogUnits))
                 @php $authUser = auth()->user(); @endphp
                 @foreach ($saleLogs as $key => $saleLog)
@@ -94,13 +93,15 @@
         </div>
 
         @if (!empty(auth()->user()->user_affiliate_type))
-            <div class="hidden md:flex gap-0">
+            <div class="hidden md:flex gap-0 right-top-nav__wallets">
                 {{-- Wallet buttons --}}
 
-                <div class="{{ $badgeDesign }}">
-                    <span class="text-md">Prime Wallet</span>
-                    <span class="{{ $badgeTextDesign }}">{{ number_format($primeBalance, 2) }}</span>
-                </div>
+                @if (auth()->user()->user_affiliate_type == App\Models\User::PRIME)
+                    <div class="{{ $badgeDesign }}">
+                        <span class="text-md">Prime Wallet</span>
+                        <span class="{{ $badgeTextDesign }}">{{ number_format($primeBalance, 2) }}</span>
+                    </div>
+                @endif
 
                 <div class="{{ $badgeDesign }}">
                     <span class="text-md">Affiliate Wallet</span>
@@ -108,7 +109,7 @@
                 </div>
             </div>
 
-            <div class="md:flex gap-0">
+            <div class="md:flex gap-0 right-top-nav__business-days">
                 {{-- Wallet buttons --}}
                 <div class="{{ $badgeDesign }}">
                     <span class="text-md">BD</span>
@@ -117,16 +118,16 @@
             </div>
 
             @if (auth()->user()->user_affiliate_type == App\Models\User::PRIME)
-                <div class="hidden md:flex gap-0">
+                <div class="hidden md:flex gap-0 right-top-nav__membership">
                     <div class="{{ $badgeDesign }}">
                         <span class="text-md">Days</span>
                         <span class="{{ $badgeTextDesign }}">{{ $daysRemaining }}</span>
                     </div>
                 </div>
             @else
-                <div class="hidden md:flex gap-0">
+                <div class="hidden md:flex gap-0 right-top-nav__membership">
                     <a href="{{ route('kyc.prime') }}"
-                        class="btn bg-yellow-500 px-4 rounded-3xl ml-4 btn-shine border-shine text-white font-semibold text-md flex gap-2 justify-center items-center hover:opacity-90 focus:ring-2">
+                        class="btn bg-yellow-500 px-4 rounded-3xl ml-4 btn-shine border-shine text-white font-semibold text-md flex gap-2 justify-center items-center hover:opacity-90 focus:ring-2 right-top-nav__go-prime">
                         <span>Go Prime</span>
                         <span class="badge bg-white text-md text-green-700">{{ $daysRemaining }}</span>
                     </a>
@@ -137,7 +138,7 @@
     </ul>
 
     <!-- Right navbar links -->
-    <ul class="navbar-nav ml-auto">
+    <ul class="navbar-nav ml-auto right-top-nav__tools">
         <!-- Navbar Search -->
         @if (auth()->user()->prime_verified == App\Models\User::PRIME_VERIFIED_STATUS_COMPLETED &&
                 !(request()->routeIs('cart') || request()->routeIs('prime_checkout')))
@@ -295,4 +296,3 @@
         });
     });
 </script>
-

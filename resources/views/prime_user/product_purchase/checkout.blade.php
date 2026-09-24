@@ -421,7 +421,7 @@
                                                 id="payment-options">
                                                 @foreach ($paymentOptions as $index => $paymentOption)
                                                     <label
-                                                        class="payment-option cursor-pointer border rounded-md overflow-hidden transition relative @if (old('payment_method', $index === 0 ? $paymentOption->id : '') == $paymentOption->id) ring-2 ring-indigo-500 @endif"
+                                                        class="payment-option cursor-pointer border rounded-md overflow-hidden transition relative @if ($paymentOption->zoomable) zoomable @endif @if (old('payment_method', $index === 0 ? $paymentOption->id : '') == $paymentOption->id) ring-2 ring-indigo-500 @endif"
                                                         data-account="{{ $paymentOption->account_number }}">
                                                         <input type="radio" name="payment_method"
                                                             value="{{ $paymentOption->id }}"
@@ -433,8 +433,15 @@
                                                                 class="w-full h-20 object-contain p-2">
                                                         @endif
                                                         <div
-                                                            class="check-icon absolute top-2 right-2 text-blue-800 text-xl hidden">
+                                                            class="check-icon absolute top-2 @if ($paymentOption->zoomable) right-12 @else right-2 @endif text-blue-800 text-xl hidden">
                                                             ✔</div>
+                                                        @if ($paymentOption->zoomable && $paymentOption->logo)
+                                                            <button type="button" class="payment-option-zoom absolute top-2 right-2 inline-flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-600 shadow-sm hover:border-indigo-500 hover:text-indigo-600"
+                                                                data-logo="{{ asset($paymentOption->logo) }}" data-name="{{ $paymentOption->name }}"
+                                                                aria-label="Zoom {{ $paymentOption->name }} logo" title="Zoom logo">
+                                                                <i class="fas fa-search-plus" aria-hidden="true"></i>
+                                                            </button>
+                                                        @endif
                                                     </label>
                                                 @endforeach
                                             </div>
@@ -463,6 +470,16 @@
                                                         name="sender_phone_number" class="w-full border rounded px-3 py-2"
                                                         placeholder="Enter sender's phone number">
                                                 </div>
+                                            </div>
+                                        </div>
+
+                                        <div id="paymentOptionZoomOverlay" class="payment-option-zoom-overlay hidden"
+                                            role="dialog" aria-modal="true" aria-labelledby="paymentOptionZoomTitle">
+                                            <div class="payment-option-zoom-panel">
+                                                <button type="button" id="paymentOptionZoomClose" class="payment-option-zoom-close"
+                                                    aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                                <h2 id="paymentOptionZoomTitle" class="sr-only"></h2>
+                                                <img id="paymentOptionZoomImage" src="" alt="">
                                             </div>
                                         </div>
                                     </div>
@@ -499,6 +516,15 @@
         </div>
     </div>
 @endsection
+
+<style>
+    .payment-option-zoom-overlay { position: fixed; z-index: 1050; inset: 0; display: flex; align-items: center; justify-content: center; padding: 24px; background: rgba(7, 18, 33, .78); }
+    .payment-option-zoom-overlay.hidden { display: none; }
+    .payment-option-zoom-panel { position: relative; max-width: min(90vw, 760px); max-height: 90vh; }
+    .payment-option-zoom-panel img { display: block; max-width: min(90vw, 720px); max-height: 86vh; object-fit: contain; }
+    .payment-option-zoom-close { position: absolute; z-index: 1; top: 8px; right: 8px; display: inline-flex; width: 32px; height: 32px; align-items: center; justify-content: center; padding: 0; color: #fff; border: 0; border-radius: 50%; background: rgba(0, 0, 0, .62); font-size: 25px; line-height: 1; cursor: pointer; }
+    .payment-option-zoom-close:hover, .payment-option-zoom-close:focus { background: rgba(0, 0, 0, .82); outline: none; }
+</style>
 
 @section('scripts')
     @include('layouts.partials._checkout_scripts')

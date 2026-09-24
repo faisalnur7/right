@@ -71,6 +71,26 @@
             $('#payment-details').addClass('hidden');
         }
 
+        $(document).on('click', '.payment-option-zoom', function(event) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            const button = $(this);
+            const name = button.data('name') || 'Payment option';
+
+            $('#paymentOptionZoomImage')
+                .attr('src', button.data('logo'))
+                .attr('alt', name + ' logo');
+            $('#paymentOptionZoomTitle').text(name + ' logo');
+            $('#paymentOptionZoomOverlay').removeClass('hidden');
+        });
+
+        $('#paymentOptionZoomClose, #paymentOptionZoomOverlay').on('click', function(event) {
+            if (event.target === this) {
+                $('#paymentOptionZoomOverlay').addClass('hidden');
+            }
+        });
+
 
         function updateSelectedCardStyle() {
             $('.address-card').removeClass('selected-card');

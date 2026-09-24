@@ -61,7 +61,8 @@ class UserController extends Controller
     {
         $request->validate([
             'phone' => 'required|numeric|digits:11|exists:otps,phone',
-            'email' => 'nullable|email'
+            'email' => 'nullable|email',
+            'temp_id' => 'nullable|exists:otps,id',
         ]);
 
         // Generate a new OTP
@@ -85,7 +86,9 @@ class UserController extends Controller
         }
 
         session()->flash('status', 'OTP resent successfully');
-        return redirect()->route('verify_otp');
+        return $request->filled('temp_id')
+            ? redirect()->route('user.otpPage', $request->temp_id)
+            : back();
     }
 
 
@@ -117,8 +120,43 @@ class UserController extends Controller
         return view('user.profile.edit_profile', $data);
     }
     
-    public function updateUserProfile(){
-        
+    public function updateUserProfile(Request $request){
+        $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['nullable', 'email', 'max:255'],
+            'phone' => ['required', 'string', 'max:20'],
+            'dob' => ['nullable', 'date'],
+            'doc_type' => ['nullable', 'integer', 'in:1,2,3'],
+            'document_number' => ['nullable', 'string', 'max:100'],
+            'account_type' => ['nullable', 'integer', 'in:1,2,3'],
+            'account_number' => ['nullable', 'string', 'max:100'],
+            'permanent_division_id' => ['nullable', 'exists:divisions,id'],
+            'permanent_district_id' => ['nullable', 'exists:districts,id'],
+            'permanent_police_station_id' => ['nullable', 'exists:police_stations,id'],
+            'permanent_post_office_id' => ['nullable', 'exists:post_offices,id'],
+            'present_division_id' => ['nullable', 'exists:divisions,id'],
+            'present_district_id' => ['nullable', 'exists:districts,id'],
+            'present_police_station_id' => ['nullable', 'exists:police_stations,id'],
+            'present_post_office_id' => ['nullable', 'exists:post_offices,id'],
+        ]);
+
+        $user = auth()->user();
+        $user->update($request->only(['name', 'email', 'phone']));
+
+        $kycFields = [
+            'mobile_number', 'emergency_contact', 'father', 'mother', 'dob', 'doc_type', 'document_number',
+            'account_type', 'account_number', 'permanent_division_id', 'permanent_district_id',
+            'permanent_police_station_id', 'permanent_post_office_id', 'permanent_post_code', 'permanent_address',
+            'present_division_id', 'present_district_id', 'present_police_station_id', 'present_post_office_id',
+            'present_post_code', 'present_address', 'is_same_address',
+        ];
+
+        $kyc = $user->kyc ?: new Kyc(['user_id' => $user->id]);
+        $kyc->fill($request->only($kycFields));
+        $kyc->user_id = $user->id;
+        $kyc->save();
+
+        return redirect()->route('editUserProfile')->with('success', 'Profile settings updated successfully.');
     }
 
 
