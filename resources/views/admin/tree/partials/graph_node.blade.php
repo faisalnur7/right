@@ -11,19 +11,24 @@ $position = $node['position'] ?? null;
 $level = $node['level'] ?? 0;
 $isActive = $node['is_active'];
 $isActiveInSL = $node['is_active_in_sale_log'];
+$isClone = !empty($node['is_clone']);
 $displayName = Str::limit($username, 12, '...');
 
 $positionText = $position == 1 ? 'L' : ($position == 2 ? 'R' : '');
 $positionClass = $position == 1 ? '-left-[3px] bg-blue-600 text-white' : ($position == 2 ? '-right-[3px] bg-orange-600 text-white' : '');
 
 $activeStyle = match (true) {
+    // Clone IDs use their own colour (purple; slate once completed)
+    $isClone && $isActive == BinaryTreeNode::ACTIVE_IN_TREE => 'border-purple-500 bg-gradient-to-br from-purple-50 to-purple-100',
+    $isClone => 'border-slate-400 bg-gradient-to-br from-slate-50 to-slate-200',
     $isActive == BinaryTreeNode::ACTIVE_IN_TREE && $isActiveInSL == BinaryTreeNode::ACTIVE_IN_TREE => 'border-green-500 bg-gradient-to-br from-green-50 to-green-100',
     $isActive == BinaryTreeNode::INACTIVE_IN_TREE && $isActiveInSL == BinaryTreeNode::ACTIVE_IN_TREE => 'border-amber-500 bg-gradient-to-br from-amber-50 to-amber-100',
     default => 'border-red-500 bg-gradient-to-br from-red-50 to-red-100',
 };
 
-$nodeId = "node-{$node['user_id']}-{$level}-" . ($position ?? 0);
-$childrenId = "children-{$node['user_id']}-{$level}";
+// node_id keeps DOM ids unique: a user can appear several times (basic + clones)
+$nodeId = "node-{$node['node_id']}";
+$childrenId = "children-{$node['node_id']}";
 @endphp
 
 <li data-level="{{ $level }}" data-position="{{ $position }}" class="tree-node flex flex-col items-center">
@@ -54,7 +59,7 @@ $childrenId = "children-{$node['user_id']}-{$level}";
                 </div>
                 <div class="flex-1">
                     <div class="font-semibold text-sm truncate" title="{{ $username }}">{{ $displayName }}</div>
-                    <div class="text-xs text-gray-800 font-bold">ID: {{ $node['user_id'] }}</div>
+                    <div class="text-xs text-gray-800 font-bold">ID: {{ $node['user_id'] }}@if($isClone) <span class="ml-1 px-1 rounded bg-purple-600 text-white">Clone</span>@endif</div>
                     <div class="text-xs text-gray-800 font-bold">{{ $affiliate_id }}</div>
                 </div>
                 <div class="text-xs text-gray-600 flex items-center gap-1">

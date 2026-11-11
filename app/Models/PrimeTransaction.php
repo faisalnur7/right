@@ -9,6 +9,8 @@ class PrimeTransaction extends Model
     protected $fillable = [
         'user_id',
         'source_user_id',
+        'sale_log_id',
+        'level',
         'type',
         'amount_in',
         'amount_out',

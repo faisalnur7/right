@@ -11,6 +11,7 @@ use App\Models\SaleLog;
 use App\Models\User;
 use App\Models\UserSaleLogUnit;
 use App\Models\BinaryTreeNode;
+use App\Models\GeneralSetting;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use App\Services\BinaryTreeService;
@@ -36,8 +37,13 @@ class UseProductController extends Controller
         return DB::transaction(function () use ($validated, $product, $authUserId) {
             
             $user = User::find($validated['user_id']);
-            $isReferrerExists = BinaryTreeNode::query()->where('user_id', $user->referenceUser?->id)->where('sale_log_id', $validated['sale_log_id'])->where('status', 1)->exists();
-            if(!$isReferrerExists){
+            // With re-use ON, a buyer who already has an active basic ID gets a clone,
+            // so the referrer does not need to be active for that placement.
+            $isCloneOfActiveBasic = GeneralSetting::reuseEnabled()
+                && (new BinaryTreeService())->activeBasicNode($user->id, $validated['sale_log_id'] ?? null);
+
+            $isReferrerExists = BinaryTreeNode::basic()->where('user_id', $user->referenceUser?->id)->where('sale_log_id', $validated['sale_log_id'])->where('status', 1)->exists();
+            if(!$isReferrerExists && !$isCloneOfActiveBasic){
                 session()->flash('error', 'Referrer is not active in the sale log.');
                 return redirect()->back();
             }
@@ -100,8 +106,11 @@ class UseProductController extends Controller
 
             // ✅ 5. Insert user into binary tree
             $user = User::find($validated['user_id']);
-            $isReferrerExists = BinaryTreeNode::query()->where('user_id', $user->referenceUser?->id)->where('sale_log_id', $validated['sale_log_id'])->where('status', 1)->exists();
-            if(!$isReferrerExists){
+            $isCloneOfActiveBasic = GeneralSetting::reuseEnabled()
+                && (new BinaryTreeService())->activeBasicNode($user->id, $validated['sale_log_id']);
+
+            $isReferrerExists = BinaryTreeNode::basic()->where('user_id', $user->referenceUser?->id)->where('sale_log_id', $validated['sale_log_id'])->where('status', 1)->exists();
+            if(!$isReferrerExists && !$isCloneOfActiveBasic){
                 session()->flash('error', 'Referrer is not active in the sale log.');
                 return redirect()->back();
             }
@@ -109,7 +118,7 @@ class UseProductController extends Controller
             $user     = User::find($validated['user_id']);
             $referrer = $user->referenceUser ?? User::find($validated['from_user_id']);
             $binaryTreeService = new BinaryTreeService();
-            $node = $binaryTreeService->insertIntoBinaryTree($user, $validated['sale_log_id'], $referrer);
+            $node = $binaryTreeService->placeUser($user, $validated['sale_log_id'], $referrer);
 
             // ✅ 5. Distribute Commission
             $commissionService = new CommissionDistributionService();

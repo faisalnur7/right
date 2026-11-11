@@ -45,7 +45,7 @@ class CommonController extends Controller
         $user = User::find($request->user_id);
         $refUser = $user->referenceUser;
 
-        return BinaryTreeNode::query()->where('user_id', $refUser->id)->where('sale_log_id', $request->sale_log_id)->where('status', 1)->exists();
+        return BinaryTreeNode::basic()->where('user_id', $refUser->id)->where('sale_log_id', $request->sale_log_id)->where('status', 1)->exists();
     }
 
     public function unread_notifications(){

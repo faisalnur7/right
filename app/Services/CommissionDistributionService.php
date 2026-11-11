@@ -80,8 +80,7 @@ class CommissionDistributionService
                     'type' => 'Associate commission',
                     'amount' => $associateCommission,
                 ];
-                $notificationService->create('wallet_notification', $parent->user_id, $notificationData, 0);
-                
+                $notificationService->create('wallet_notification', $superPrimeUser->id, $notificationData, 0);
             }
         }
     }

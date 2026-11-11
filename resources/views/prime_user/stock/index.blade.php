@@ -156,6 +156,14 @@
                                         }
                                     }
 
+                                    // Re-use setting: Use button always available, labelled Clone while a basic ID is active
+                                    $reuseEnabled = App\Models\GeneralSetting::reuseEnabled();
+                                    $hasActiveBasic = $reuseEnabled && App\Models\BinaryTreeNode::basic()
+                                        ->where('user_id', $authUser->id)
+                                        ->where('sale_log_id', $saleLogId)
+                                        ->where('status', 1)
+                                        ->exists();
+
                                 @endphp
                                 <tr>
                                     <td>{{ $loop->iteration }}</td>
@@ -179,9 +187,12 @@
                                                 </button>
                                             @endif
                                             @if (
-                                                (!$isActiveOnSaleLog && $item->total_quantity && $isRefActive) ||
-                                                    ($isPrime && $item->total_quantity && $isInactiveInTree) ||
-                                                    $showUseButton)
+                                                $reuseEnabled
+                                                    ? ($item->total_quantity && ($isPrime || $isRefActive || !empty($latestNode)))
+                                                    : ((!$isActiveOnSaleLog && $item->total_quantity && $isRefActive) ||
+                                                        ($isPrime && $item->total_quantity && $isInactiveInTree) ||
+                                                        $showUseButton)
+                                            )
                                                 <button type="button"
                                                     class="btn btn-md btn-dark open-use-modal h-10 flex gap-2 items-center justify-center"
                                                     data-bs-toggle="modal" data-bs-target="#useProductModal"
@@ -192,7 +203,7 @@
                                                     data-product-quantity="{{ $item->total_quantity }}"
                                                     data-unit="{{ $unit }}" data-price="{{ $price }}"
                                                     data-use_url="{{ route('use_product', [$item->product_id, $item->sale_log_id]) }}">
-                                                    <i class="fas fa-cogs"></i> Use
+                                                    <i class="fas fa-cogs"></i> {{ $hasActiveBasic ? 'Clone' : 'Use' }}
                                                 </button>
                                             @endif
                                             @if (!$isPrime && empty($isRefActive) && !$alreadyRequested)

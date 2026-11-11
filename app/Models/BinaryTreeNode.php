@@ -8,7 +8,11 @@ class BinaryTreeNode extends Model
 {
 
     protected $fillable = [
-        'user_id','parent_id','parent_node_id','great_parent_id','active_in_sale_log','level','activation_number','sale_log_id','position','status'
+        'user_id','parent_id','parent_node_id','great_parent_id','active_in_sale_log','level','activation_number','sale_log_id','position','status','is_clone'
+    ];
+
+    protected $casts = [
+        'is_clone' => 'boolean',
     ];
 
     /**
@@ -21,6 +25,19 @@ class BinaryTreeNode extends Model
     const ACTIVE_IN_TREE = 1;
     const INACTIVE_IN_TREE = 0;
     const INACTIVE_PENDING_IN_TREE = 2;
+
+    /** Descendants (within 3 levels) needed for a node to complete its sale log. */
+    const COMPLETION_THRESHOLD = 14;
+
+    public function scopeBasic($query)
+    {
+        return $query->where('is_clone', false);
+    }
+
+    public function scopeClones($query)
+    {
+        return $query->where('is_clone', true);
+    }
 
     public function user() {
         return $this->belongsTo(User::class,'user_id');
@@ -53,10 +70,16 @@ class BinaryTreeNode extends Model
                 break;
             }
 
-            $parent = BinaryTreeNode::where('user_id', $current->parent_id)
-                ->where('sale_log_id', $saleLogId)
-                ->where('level', $current->level - 1)
-                ->first();
+            if (!empty($current->parent_node_id)) {
+                // Exact link: a user can have several nodes (basic + clones) in one sale log.
+                $parent = BinaryTreeNode::find($current->parent_node_id);
+            } else {
+                // Legacy rows without parent_node_id.
+                $parent = BinaryTreeNode::where('user_id', $current->parent_id)
+                    ->where('sale_log_id', $saleLogId)
+                    ->where('level', $current->level - 1)
+                    ->first();
+            }
 
             if (!$parent) {
                 break;

@@ -68,6 +68,13 @@
                                             $showUseButton = true;
                                         }
                                     }
+
+                                    $reuseEnabled = App\Models\GeneralSetting::reuseEnabled();
+                                    $hasActiveBasic = $reuseEnabled && App\Models\BinaryTreeNode::basic()
+                                        ->where('user_id', $user->id)
+                                        ->where('sale_log_id', $saleLogId)
+                                        ->where('status', 1)
+                                        ->exists();
                                 @endphp
                                 <tr>
                                     <td>{{ $loop->iteration }}</td>
@@ -78,7 +85,7 @@
                                     <td>৳{{ number_format($price, 2) }}</td>
                                     <td>
                                         <div class="d-flex justify-content-start gap-2">
-                                            @if ((!$isActiveOnSaleLog && $item->total_quantity) || $showUseButton || empty($latestNode))
+                                            @if ($reuseEnabled ? $item->total_quantity : ((!$isActiveOnSaleLog && $item->total_quantity) || $showUseButton || empty($latestNode)))
                                                 <button type="button"
                                                     class="btn btn-md btn-dark open-use-modal flex gap-2 items-center justify-center"
                                                     data-bs-toggle="modal" data-bs-target="#useProductModal"
@@ -89,7 +96,7 @@
                                                     data-product-quantity="{{ $item->total_quantity }}"
                                                     data-unit="{{ $unit }}" data-price="{{ $price }}"
                                                     data-use_url="{{ route('adminUseProduct', [$user->id, $item->product_id, $item->sale_log_id]) }}">
-                                                    <i class="fas fa-cogs"></i> Use
+                                                    <i class="fas fa-cogs"></i> {{ $hasActiveBasic ? 'Clone' : 'Use' }}
                                                 </button>
                                             @endif
                                         </div>
