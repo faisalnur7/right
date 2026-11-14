@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Product;
 use App\Models\BinaryTreeNode;
+use App\Models\GeneralSetting;
 use App\Models\UseProduct;
 use App\Models\Order;
 use App\Models\OrderItem;
@@ -31,7 +32,6 @@ class BinaryTreeNodeController extends Controller
             DB::commit();
             session()->flash('success', 'Product used and user placed in tree');
         } catch (\Exception $e) {
-            dd($e);
             DB::rollBack();
             return redirect()->back()->with('error', $e->getMessage() ?: 'Something went wrong. Please try again.');
         }
@@ -318,6 +318,7 @@ class BinaryTreeNodeController extends Controller
             'activation_number' => $rootNode->activation_number,
             'is_active' => $rootNode->status,
             'is_active_in_sale_log' => $isActive,
+            'is_clone' => (bool) $rootNode->is_clone,
             'has_photo' => $hasPhoto,
             'descendant_count' => $descendantCount,
             'immediate_children_count' => $immediateChildrenCount,
@@ -565,17 +566,18 @@ class BinaryTreeNodeController extends Controller
             $logUnit->save();
 
             // ✅ 5. Place user in binary tree (only first activation)
-            $alreadyPlaced = BinaryTreeNode::where('user_id', $user->id)
+            $alreadyPlaced = BinaryTreeNode::basic()->where('user_id', $user->id)
                 ->where('sale_log_id', $saleLog->id)
                 ->where('status', BinaryTreeNode::ACTIVE_IN_TREE)
                 ->exists();
 
             $node = null;
-            if (!$alreadyPlaced) {
+            // Re-use ON: an already active user is placed again as a clone under the basic ID.
+            if (!$alreadyPlaced || GeneralSetting::reuseEnabled()) {
                 $referrer = $user->referenceUser ?? null;
 
                 $binaryTreeService = new BinaryTreeService();
-                $node = $binaryTreeService->insertIntoBinaryTree($user, $saleLog->id, $referrer);
+                $node = $binaryTreeService->placeUser($user, $saleLog->id, $referrer);
             }
 
             // ✅ Step 6: Distribute Commissions

@@ -24,20 +24,32 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
 
 Route::get('/', [DashboardController::class, 'index'])->name('homepage');
-Route::get('/', [DashboardController::class, 'index'])->name('homepage');
 
 Route::get('/reboot', function () {
-    Artisan::call('optimize:clear');
-    Artisan::call('cache:clear');
-    Artisan::call('route:clear');
-    Artisan::call('config:clear');
-    Artisan::call('view:clear');
-    Artisan::call('clear-compiled');
-    Artisan::call('migrate', ['--force' => true]);
-    Artisan::call('config:cache');
-    Artisan::call('route:cache');
-    Artisan::call('view:cache');
-    return 'rebooted & caches cleared!';
+    $commands = [
+        ['optimize:clear', []],
+        ['migrate', ['--force' => true]],
+        ['migrate:status', []],
+        ['config:cache', []],
+        ['route:cache', []],
+        ['view:cache', []],
+    ];
+
+    $log = '';
+    foreach ($commands as [$command, $params]) {
+        $log .= "===== {$command} =====\n";
+        try {
+            $exit = Artisan::call($command, $params);
+            $log .= Artisan::output() . "(exit code: {$exit})\n\n";
+        } catch (\Throwable $e) {
+            $log .= 'FAILED: ' . get_class($e) . ': ' . $e->getMessage() . "\n\n";
+            if ($command === 'migrate') {
+                break; // don't re-cache on top of a failed migration
+            }
+        }
+    }
+
+    return response("<pre>" . e($log) . "</pre>");
 });
 
 Route::get('/update_tree', function () {

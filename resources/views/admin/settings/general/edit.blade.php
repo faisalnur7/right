@@ -107,6 +107,15 @@
                     @endif
                 </div>
 
+                <div class="form-group">
+                    <div class="custom-control custom-switch">
+                        <input type="checkbox" name="reuse_enabled" id="reuse_enabled" value="1"
+                            class="custom-control-input" {{ old('reuse_enabled', $settings->reuse_enabled ?? false) ? 'checked' : '' }}>
+                        <label class="custom-control-label" for="reuse_enabled">Enable Re-use (Clone) setting</label>
+                    </div>
+                    <small class="text-muted">Off: existing behaviour. On: an active customer can re-use a product and is placed as a clone under their basic ID.</small>
+                </div>
+
                 <div class="form-group mt-4">
                     <button type="submit" class="btn btn-success">Update Settings</button>
                     <a href="{{ route('admin.dashboard') }}" class="btn btn-neutral">Cancel</a>

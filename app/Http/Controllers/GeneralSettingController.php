@@ -34,6 +34,7 @@ class GeneralSettingController extends Controller
         ]);
 
         $data = $validated;
+        $data['reuse_enabled'] = $request->boolean('reuse_enabled');
 
         // Upload site_logo
         if ($request->hasFile('site_logo')) {

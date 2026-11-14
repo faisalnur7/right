@@ -233,7 +233,7 @@ class User extends Authenticatable
 
     public function isActiveOrPendingInSaleLog($saleLogId){
         $referenceUser = $this->referenceUser;
-        $latestNode = $referenceUser->binaryTreeNodes()->where('sale_log_id', $saleLogId)->latest()->first();
+        $latestNode = $referenceUser->binaryTreeNodes()->basic()->where('sale_log_id', $saleLogId)->latest()->first();
 
         if($latestNode && ($latestNode->status = 1 && $latestNode->status = 1)){
             return 1;
@@ -250,6 +250,7 @@ class User extends Authenticatable
 
     public function isActiveInSaleLogTree($saleLogId){
         return $this->binaryTreeNodes()
+            ->basic()
             ->where('sale_log_id', $saleLogId)
             ->where('status', 1)
             ->latest()
@@ -258,6 +259,7 @@ class User extends Authenticatable
 
     public function isActiveInSaleLogTreeAdmin($saleLogId){
         $latestNode =  $this->binaryTreeNodes()
+            ->basic()
             ->where('sale_log_id', $saleLogId)
             ->latest()
             ->first();
@@ -281,6 +283,7 @@ class User extends Authenticatable
 
     public function maxActivationInSaleLog($saleLogId){
         $latestNode =  $this->binaryTreeNodes()
+            ->basic()
             ->where('sale_log_id', $saleLogId)
             ->latest()
             ->first();
@@ -444,7 +447,7 @@ class User extends Authenticatable
 
     public function activationCountBySaleLog($saleLogId)
     {
-        return $this->binaryTreeNodes()->where('user_id', $this->id)->where('sale_log_id', $saleLogId)->count();
+        return $this->binaryTreeNodes()->basic()->where('user_id', $this->id)->where('sale_log_id', $saleLogId)->count();
     }
 
 

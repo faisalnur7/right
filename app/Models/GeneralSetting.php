@@ -20,6 +20,19 @@ class GeneralSetting extends Model
         'linkedin',
         'youtube',
         'business_start_date',
+        'reuse_enabled',
     ];
+
+    protected $casts = [
+        'reuse_enabled' => 'boolean',
+    ];
+
+    /**
+     * Whether the re-use (clone) feature is switched on. Off = legacy behaviour.
+     */
+    public static function reuseEnabled(): bool
+    {
+        return (bool) optional(static::first())->reuse_enabled;
+    }
 
 }
