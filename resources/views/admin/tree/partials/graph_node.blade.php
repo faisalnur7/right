@@ -12,6 +12,8 @@ $level = $node['level'] ?? 0;
 $isActive = $node['is_active'];
 $isActiveInSL = $node['is_active_in_sale_log'];
 $isClone = !empty($node['is_clone']);
+// Read-only trees (e.g. Team Organogram) pass canDrill => false to hide subtree navigation.
+$canDrill = $canDrill ?? true;
 $displayName = Str::limit($username, 12, '...');
 
 $positionText = $position == 1 ? 'L' : ($position == 2 ? 'R' : '');
@@ -85,10 +87,12 @@ $childrenId = "children-{$node['node_id']}";
             </div>
 
             <div class="flex gap-2 mt-2">
+                @if($canDrill)
                 <button class="px-2 py-1 bg-blue-500 text-white rounded text-xs flex-1"
                         onclick="loadTree({{ $node['user_id'] }}, {{ $node['node_id'] }}); event.stopPropagation();">
                     <i class="fas fa-sitemap mr-1"></i>
                 </button>
+                @endif
                 <button class="px-2 py-1 bg-gray-300 text-gray-700 rounded text-xs flex-1"
                         onclick="toggleNodeDetails('{{ $nodeId }}'); event.stopPropagation();">
                     Close
@@ -101,7 +105,7 @@ $childrenId = "children-{$node['node_id']}";
     @if(!empty($node['children']))
         <ul id="{{ $childrenId }}" class="">
             @foreach($node['children'] as $child)
-                @include('admin.tree.partials.graph_node', ['node' => $child, 'saleLogId' => $saleLogId])
+                @include('admin.tree.partials.graph_node', ['node' => $child, 'saleLogId' => $saleLogId ?? null, 'canDrill' => $canDrill])
             @endforeach
         </ul>
     @endif

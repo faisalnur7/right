@@ -71,19 +71,12 @@
                   @if ($prime_menu)
                       <!-- Prime Requests -->
                       <li
-                          class="nav-item  {{ menuOpen(['prime_requests','general_affiliates', 'approved_prime_requests', 'rejected_prime_requests']) ? 'menu-is-opening menu-open' : '' }}">
+                          class="nav-item  {{ menuOpen(['general_affiliates', 'approved_prime_requests', 'team_organogram']) ? 'menu-is-opening menu-open' : '' }}">
                           <a href="#" class="nav-link">
                               <i class="nav-icon fas fa-user-shield"></i>
                               <p>Prime Operation <i class="right fas fa-angle-left"></i></p>
                           </a>
                           <ul class="nav nav-treeview">
-                              <li class="nav-item">
-                                  <a href="{{ route('prime_requests') }}"
-                                      class="nav-link  {{ request()->routeIs('prime_requests') ? 'active' : '' }}">
-                                      <i class="fas fa-hourglass-half nav-icon"></i>
-                                      <p>New Requests</p>
-                                  </a>
-                              </li>
                               {{-- Should be parent item --}}
                               <li class="nav-item">
                                   <a href="{{ route('approved_prime_requests') }}"
@@ -93,18 +86,17 @@
                                   </a>
                               </li>
                               <li class="nav-item">
-                                  <a href="{{ route('rejected_prime_requests') }}"
-                                      class="nav-link  {{ request()->routeIs('rejected_prime_requests') ? 'active' : '' }}">
-                                      <i class="fas fa-times-circle nav-icon"></i>
-                                      <p>Rejected Requests</p>
-                                  </a>
-                              </li>
-
-                              <li class="nav-item">
                                   <a href="{{ route('general_affiliates') }}"
                                       class="nav-link  {{ request()->routeIs('general_affiliates') ? 'active' : '' }}">
                                       <i class="fas fa-hands-helping nav-icon"></i>
                                       <p>General Affiliates</p>
+                                  </a>
+                              </li>
+                              <li class="nav-item">
+                                  <a href="{{ route('team_organogram') }}"
+                                      class="nav-link  {{ request()->routeIs('team_organogram') ? 'active' : '' }}">
+                                      <i class="fas fa-sitemap nav-icon"></i>
+                                      <p>Team Organogram</p>
                                   </a>
                               </li>
                           </ul>

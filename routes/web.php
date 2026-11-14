@@ -18,6 +18,7 @@ use App\Http\Controllers\PrimeTransactionController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\UserActiveRequestController;
 use App\Http\Controllers\BinaryTreeNodeController;
+use App\Http\Controllers\TeamOrganogramController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use Illuminate\Support\Facades\Route;
@@ -125,6 +126,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/approved_prime_requests', [PrimeRequestController::class, 'approved_prime_requests'])->name('approved_prime_requests');
     Route::get('/rejected_prime_requests', [PrimeRequestController::class, 'rejected_prime_requests'])->name('rejected_prime_requests');
     Route::get('/general_affiliates', [PrimeRequestController::class, 'general_affiliates'])->name('general_affiliates');
+    Route::get('/team-organogram', [TeamOrganogramController::class, 'index'])->name('team_organogram');
     Route::post('/prime-request', [PrimeRequestController::class, 'store'])->name('prime.request');
     Route::post('/prime-request-cancel', [PrimeRequestController::class, 'cancel_request'])->name('prime.cancel_request');
     Route::post('/prime-request/{id}/respond', [PrimeRequestController::class, 'respond'])->name('prime.respond');
